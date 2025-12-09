@@ -1,0 +1,80 @@
+# ───────────────────────────────
+# NODE & EXPRESS BACKEND IGNORE
+# ───────────────────────────────
+
+# Node modules
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+logs/
+*.log
+*.tmp
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Editor folders
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Environment variables (VERY IMPORTANT)
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Build output
+dist/
+build/
+tmp/
+.cache/
+.next/
+out/
+
+# Uploads (if created later)
+uploads/
+public/uploads/
+storage/
+
+# Node REPL history
+.node_repl_history
+
+# NPM cache
+.npm/
+
+# Optional: lock files (if you want)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# OS junk
+*.swp
+*.swo
+*.orig
+
+# Backup files
+*.bak
+*.backup
+
+# Coverage reports
+coverage/
+*.lcov
+
+# TypeScript (if ever used)
+*.tsbuildinfo
+
+# Bun (if installed)
+bun.lockb
