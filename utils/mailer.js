@@ -1,14 +1,22 @@
-const { Resend } = require("resend");
+// utils/mailer.js
+const nodemailer = require("nodemailer");
 
-// Initialize Resend
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Create SMTP transporter (Brevo)
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,       // smtp-relay.brevo.com
+  port: parseInt(process.env.SMTP_PORT, 10), // 587
+  secure: false,                     // MUST be false for port 587
+  auth: {
+    user: process.env.SMTP_USER,     // 9db260001@smtp-brevo.com
+    pass: process.env.SMTP_PASS      // your brevo password
+  }
+});
 
-// Convert report → HTML email
+// Convert report → HTML
 function generateReportHTML(report) {
   return `
     <h2>Your Astravia Numerology Report</h2>
-    <p>Hi,</p>
-    <p>Your report for <strong>${report.meta.name}</strong> (DOB: ${report.meta.dob}) has been generated.</p>
+    <p>Your report for <strong>${report.meta.name}</strong> (DOB: ${report.meta.dob}) is ready.</p>
 
     <h3>Core Numbers</h3>
     <p><strong>Life Path:</strong> ${report.coreNumbers.lifePath.value}</p>
@@ -20,32 +28,28 @@ function generateReportHTML(report) {
     <p><strong>${report.summary.headline}</strong></p>
     <p>${report.summary.comboSummary}</p>
 
-    <p>You can read the full detailed report inside Astravia.</p>
+    <p>You can read the full detailed report anytime in Astravia.</p>
   `;
 }
 
 async function sendReportEmail(recipient, report) {
   if (!recipient) return { success: false, error: "Recipient missing" };
 
-  const subject = `Your Astravia Numerology Report – ${report.meta.name}`;
-  const html = generateReportHTML(report);
+  const mailOptions = {
+    from: process.env.MAIL_FROM, // "Astravia <9db260001@smtp-brevo.com>"
+    to: recipient,
+    subject: `Your Astravia Numerology Report – ${report.meta.name}`,
+    html: generateReportHTML(report)
+  };
 
   try {
-    const response = await resend.emails.send({
-      from: process.env.MAIL_FROM || "Astravia <noreply@astravia.com>",
-      to: recipient,
-      subject,
-      html,
-    });
-
-    console.log("📨 Email sent:", response);
+    const info = await transporter.sendMail(mailOptions);
+    console.log("📨 Email sent successfully:", info.messageId);
     return { success: true };
   } catch (error) {
-    console.error("❌ Email error:", error);
+    console.error("❌ Email send error:", error);
     return { success: false, error };
   }
 }
 
-module.exports = {
-  sendReportEmail,
-};
+module.exports = { sendReportEmail };
