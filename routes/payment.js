@@ -61,11 +61,11 @@ router.post("/free-generate", async (req, res) => {
     const report = generateReport(name, dob);
     saveReport(identifier, report);
 
-    // Send email in background — DO NOT block response
+    // 🔥 Trigger email asynchronously (NON BLOCKING)
     if (identifier.includes("@")) {
-      sendReportEmail(identifier, report).catch((e) =>
-        console.error("❌ Email send error:", e)
-      );
+      sendReportEmail(identifier, report).catch((err) => {
+        console.error("❌ Email send failed:", err);
+      });
     }
 
     return res.json({
@@ -93,7 +93,6 @@ router.post("/verify", async (req, res) => {
       razorpay_signature,
     } = req.body;
 
-    // Validate input
     if (!identifier || !name || !dob) {
       return res.status(400).json({
         error: "identifier, name, dob required",
@@ -106,8 +105,8 @@ router.post("/verify", async (req, res) => {
       });
     }
 
-    // Validate signature
-    const body = razorpay_order_id + "|" + razorpay_payment_id;
+    // Validate payment signature
+    const body = `${razorpay_order_id}|${razorpay_payment_id}`;
     const expectedSign = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(body)
@@ -120,15 +119,15 @@ router.post("/verify", async (req, res) => {
       });
     }
 
-    // Payment is valid → generate report
+    // 🔥 Payment verified → generate full report
     const report = generateReport(name, dob);
     saveReport(identifier, report);
 
-    // Email asynchronously
+    // 🔥 Trigger email asynchronously (won't block API)
     if (identifier.includes("@")) {
-      sendReportEmail(identifier, report).catch((e) =>
-        console.error("❌ Email send error:", e)
-      );
+      sendReportEmail(identifier, report).catch((err) => {
+        console.error("❌ Email send failed:", err);
+      });
     }
 
     return res.json({
